@@ -1,11 +1,11 @@
 {
-  "name": "blackhats-nmapper-bot",
+  "name": "blackhats-nmapper",
   "version": "1.0.0",
-  "description": "Telegram bot for website scanning and email extraction",
-  "main": "index.js",
+  "description": "Telegram bot for Nmap scans and email extraction",
   "dependencies": {
     "node-telegram-bot-api": "0.50.0",
-    "jssoup": "^1.4.0",
-    "node-nmap": "^1.2.0"
+    "node-nmap": "^1.6.3",
+    "request": "^2.88.2",
+    "jsdom": "^16.6.0"
   }
 }
