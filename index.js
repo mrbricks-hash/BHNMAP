@@ -1,68 +1,65 @@
-const { Telegraf, Markup } = require('telegraf');
-const Nmap = require('node-nmap');
-const JSSoup = require('jssoup').default;
+const Telegraf = require('telegraf');
+const { JSSoup } = require('jssoup');
+const { Nmap } = require('node-nmap');
 
-const bot = new Telegraf('YOUR_TELEGRAM_BOT_TOKEN');
+const bot = new Telegraf('5871264620:AAHzJB0P1vEDue0NCEY8DwNbC335PQokoAE');
 
-bot.start((ctx) => {
-  ctx.reply('Push start to work magic. 🧙‍♂️', Markup.inlineKeyboard([Markup.button.callback('Start', 'start')]));
+// Start command handler
+bot.command('start', (ctx) => {
+  ctx.replyWithMarkdownV2('Push start to work magic. \n\n💻🎩');
 });
 
-bot.action('start', (ctx) => {
-  ctx.reply("Enter the target website you'd like to map. 🌐");
+// Text message handler
+bot.on('text', (ctx) => {
+  if (ctx.message.text.startsWith('http://') || ctx.message.text.startsWith('https://')) {
+    const targetWebsite = ctx.message.text;
+    
+    ctx.reply('Blackhat\'s working his magic. ⚡️');
+
+    // Perform Nmap scan
+    const nmap = new Nmap();
+    nmap.scan(targetWebsite, ['-p', '80,443'], (err, report) => {
+      if (err) {
+        ctx.reply('Oops! Something went wrong while scanning the target website. Please try again later. ❌');
+        console.error(err);
+        return;
+      }
+
+      const emailSet = new Set();
+
+      // Extract emails using JSSoup
+      const soup = new JSSoup(report[0].data);
+      const emailElements = soup.findAll('a[href^="mailto:"]');
+      
+      emailElements.forEach((element) => {
+        const email = element.attrs.href.replace('mailto:', '');
+        emailSet.add(email);
+      });
+
+      if (emailSet.size === 0) {
+        ctx.reply('No emails found on the target website. 😕');
+      } else {
+        const emailList = Array.from(emailSet);
+        ctx.reply(`Emails found on the target website:\n\n${emailList.join('\n')}`);
+      }
+
+      // Ask if user wants to conduct another scrape
+      ctx.replyWithMarkdownV2('Would you like to conduct another scrape? \n\n✨ Yes, please /start another scrape.\n\n🚫 No, thanks.');
+    });
+  } else {
+    ctx.reply('Please enter a valid URL starting with http:// or https://. 🌐');
+  }
 });
 
-bot.on('text', async (ctx) => {
-  const targetWebsite = ctx.message.text;
-
-  ctx.reply('Blackhat is working his magic... ⚡️');
-
-  const nmap = new Nmap();
-  nmap.scan(targetWebsite, '-p 80,443', (err, report) => {
-    if (err) {
-      console.error(err);
-      ctx.reply('Oops! Something went wrong.');
-      return;
-    }
-
-    const { ports } = report[0];
-    const openPorts = ports.filter((port) => port.state === 'open');
-
-    if (openPorts.length === 0) {
-      ctx.reply('No open ports found.');
-      return;
-    }
-
-    const webPage = openPorts.find((port) => port.port === 80 || port.port === 443);
-    if (!webPage) {
-      ctx.reply('No web page found on port 80 or 443.');
-      return;
-    }
-
-    const { ip } = report[0];
-    const webPageUrl = `http://${ip}:${webPage.port}`;
-
-    const emails = await extractEmailsFromWebPage(webPageUrl);
-    if (emails.length === 0) {
-      ctx.reply('No emails found on the target website.');
-      return;
-    }
-
-    const emailList = emails.join('\n');
-    ctx.reply(`Emails found on ${targetWebsite}:\n\n${emailList}`);
-
-    ctx.reply('Would you like to conduct another scrape?', Markup.inlineKeyboard([Markup.button.callback('Yes', 'start'), Markup.button.callback('No', 'end')]));
-  });
+// Handle 'Yes, please' response
+bot.command('start', (ctx) => {
+  ctx.replyWithMarkdownV2('Sure! Enter the target website URL you\'d like to map.');
 });
 
-bot.action('end', (ctx) => {
-  ctx.reply('Thank you for using Blackhats Nmapper. Have a great day! 👋');
+// Handle 'No, thanks' response
+bot.command('stop', (ctx) => {
+  ctx.reply('Thank you for using Blackhats Nmapper! If you have any other questions, feel free to ask. 👋');
 });
 
-async function extractEmailsFromWebPage(url) {
-  const response = await fetch(url);
-  const html = await response.text();
-
-  const soup = new JSSoup(html);
-  const emailTags = soup.findAll('a[href^="mailto:"]');
-  const emails = emailTags.map((tag) => tag.attrs.href
+// Start the bot
+bot.launch();
