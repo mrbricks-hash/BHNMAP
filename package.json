@@ -1,0 +1,14 @@
+{
+  "name": "blackhats-nmapper-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for Nmap scans and email extraction",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.4.2",
+    "jssoup": "^0.4.4",
+    "node-nmap": "^2.0.0"
+  }
+}
