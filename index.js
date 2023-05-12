@@ -3,7 +3,7 @@ const JSSoup = require('jssoup').default;
 const nmap = require('node-nmap');
 
 // Telegram Bot Token
-const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+const token = '5871264620:AAHzJB0P1vEDue0NCEY8DwNbC335PQokoAE';
 const bot = new TelegramBot(token, { polling: true });
 
 // Handler for /start command and initial message
